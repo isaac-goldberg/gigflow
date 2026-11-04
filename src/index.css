@@ -1,0 +1,89 @@
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/700.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-gig-bg text-gig-text;
+  /* IBM Plex Sans: neutral, engineered, modern — pairs naturally with the
+     Plex Mono already used for BPM/key/time readouts. Self-hosted via
+     @fontsource so it works fully offline at a venue, no CDN dependency. */
+  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 400;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  /* No smooth-scroll, no global transitions: state changes are instant,
+     like hardware controls, not soft-animated UI chrome. */
+}
+
+* {
+  transition: none !important;
+  animation: none !important;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+button:active:not(:disabled) {
+  filter: brightness(0.85);
+}
+
+a,
+[role="tab"],
+[role="button"] {
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 1px solid #9bff1f;
+  outline-offset: -1px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0a0b;
+}
+::-webkit-scrollbar-thumb {
+  background: #333336;
+  border: 2px solid #0a0a0b;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #444448;
+}
+
+.label-xs {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8c8e93;
+}
+
+.panel-flat {
+  background-color: #131315;
+  border: 1px solid #303033;
+}
