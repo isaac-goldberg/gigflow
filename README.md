@@ -18,7 +18,22 @@ Rekordbox XML.
    Open Terminal (Spotlight → "Terminal"), paste that line, press Enter. Gigflow will open
    normally from then on.
 
-This build is Apple Silicon (M-series) only. Intel Macs and Windows need a separate build.
+This build is Apple Silicon (M-series) only. Intel Macs need a separate build.
+
+## Installing on Windows
+
+Run the `.exe` (NSIS installer) or `.msi` — either works; the `.msi` is better for IT-managed
+machines. Windows SmartScreen may warn "Windows protected your PC" since the installer isn't
+signed with a code-signing certificate yet — click **More info → Run anyway**.
+
+Windows builds come from GitHub Actions (`.github/workflows/build-windows.yml`), since a Windows
+installer can't be cross-compiled from a Mac. It runs automatically on every push to `main`;
+grab the result from the workflow run's **Artifacts** section, or via:
+
+```bash
+gh run list --repo isaac-goldberg/gigflow
+gh run download <run-id> --repo isaac-goldberg/gigflow
+```
 
 ## Development
 
