@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
+  EngineStatus,
   HotCue,
   Profile,
   SetlistEntry,
@@ -7,7 +8,9 @@ import type {
   Setlist,
   Track,
   TrackSuggestion,
-  Transition,
+  TransitionSpec,
+  TransitionSuggestion,
+  TransitionZone,
 } from "../types";
 
 export const api = {
@@ -21,8 +24,11 @@ export const api = {
     keyName?: string | null;
     title?: string | null;
     artist?: string | null;
+    genre?: string | null;
+    subgenre?: string | null;
   }) => invoke<Track>("update_track", args),
   deleteTrack: (trackId: string) => invoke<void>("delete_track", { trackId }),
+  deleteAllTracks: () => invoke<number>("delete_all_tracks"),
 
   getHotCues: (trackId: string) => invoke<HotCue[]>("get_hot_cues", { trackId }),
   deleteHotCue: (cueId: string) => invoke<void>("delete_hot_cue", { cueId }),
@@ -41,27 +47,49 @@ export const api = {
   removeSetlistEntry: (entryId: string) => invoke<void>("remove_setlist_entry", { entryId }),
   reorderSetlist: (setlistId: string, orderedEntryIds: string[]) =>
     invoke<void>("reorder_setlist", { setlistId, orderedEntryIds }),
-  assignTransition: (entryId: string, transitionId: string | null) =>
-    invoke<void>("assign_transition", { entryId, transitionId }),
-
-  saveTransition: (args: {
-    name: string;
-    transitionType: string;
-    crossfadeSecs: number;
+  setEntryTransition: (args: {
+    entryId: string;
+    transitionType?: string | null;
+    crossfadeSecs?: number | null;
     cueOutSecs?: number | null;
     cueInSecs?: number | null;
     notes?: string | null;
-    fromKey?: string | null;
-    toKey?: string | null;
-  }) => invoke<Transition>("save_transition", args),
-  listTransitions: () => invoke<Transition[]>("list_transitions"),
-  deleteTransition: (transitionId: string) => invoke<void>("delete_transition", { transitionId }),
+  }) => invoke<void>("set_entry_transition", args),
+  suggestTransition: (trackAId: string, trackBId: string) =>
+    invoke<TransitionSuggestion>("suggest_transition", { trackAId, trackBId }),
 
   getProfile: () => invoke<Profile>("get_profile"),
   updateProfile: (profile: Profile) => invoke<Profile>("update_profile", { profile }),
 
   exportSetlist: (setlistId: string, destFolder: string) =>
     invoke<string>("export_setlist", { setlistId, destFolder }),
+
+  setEntryTransitionEnabled: (entryId: string, enabled: boolean) =>
+    invoke<void>("set_entry_transition_enabled", { entryId, enabled }),
+
+  normalizeAllGenres: () => invoke<number>("normalize_all_genres"),
+  suggestSubgenre: (trackId: string) => invoke<string | null>("suggest_subgenre", { trackId }),
+  resetAllAnalysis: () => invoke<number>("reset_all_analysis"),
+
+  genreModelDownloaded: () => invoke<boolean>("genre_model_downloaded"),
+  downloadGenreModel: () => invoke<void>("download_genre_model"),
+
+  playTrack: (trackId: string) => invoke<number>("play_track", { trackId }),
+  pauseTrack: () => invoke<void>("pause_track"),
+  resumeTrack: () => invoke<void>("resume_track"),
+  seekTrack: (trackId: string | null, positionSecs: number) => invoke<void>("seek_track", { trackId, positionSecs }),
+  getPlaybackStatus: () => invoke<EngineStatus | null>("get_playback_status"),
+  armTransition: (spec: TransitionSpec) =>
+    invoke<TransitionZone | null>("arm_transition", {
+      fromTrackId: spec.fromTrackId,
+      toTrackId: spec.toTrackId,
+      transitionType: spec.transitionType,
+      crossfadeSecs: spec.crossfadeSecs,
+      cueOutSecs: spec.cueOutSecs,
+      cueInSecs: spec.cueInSecs,
+    }),
+  disarmTransition: () => invoke<void>("disarm_transition"),
+  stopTrack: () => invoke<void>("stop_track"),
 };
 
 export function formatDuration(secs: number | null): string {

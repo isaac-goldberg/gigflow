@@ -1,7 +1,15 @@
+pub mod beatgrid;
 pub mod bpm;
 pub mod decode;
+pub mod dsp;
+#[cfg(test)]
+mod diagnostic_test;
+pub mod energy;
 pub mod hotcues;
 pub mod key;
+pub mod mix;
+pub mod stretch;
+pub mod waveform;
 
 use std::path::Path;
 
@@ -14,15 +22,17 @@ pub struct AnalysisResult {
     pub key_confidence: f64,
     pub energy: f64,
     pub hot_cues: Vec<hotcues::HotCue>,
+    pub waveform_peaks: Vec<(f32, f32)>,
 }
 
-/// Full analysis pipeline for one audio file: decode -> BPM -> key -> energy -> hot cues.
+/// Full analysis pipeline for one audio file: decode -> BPM -> key -> energy -> hot cues -> waveform.
 pub fn analyze_file(path: &Path) -> Result<AnalysisResult, String> {
     let decoded = decode::decode_file(path)?;
     let bpm_result = bpm::detect_bpm(&decoded.samples, decoded.sample_rate);
     let key_result = key::detect_key(&decoded.samples, decoded.sample_rate);
-    let energy = rms_energy(&decoded.samples);
+    let energy = energy::compute_energy(&decoded.samples, decoded.sample_rate, bpm_result.bpm);
     let hot_cues = hotcues::detect_hot_cues(&decoded.samples, decoded.sample_rate, bpm_result.bpm);
+    let waveform_peaks = waveform::compute_peaks(&decoded.samples);
 
     Ok(AnalysisResult {
         duration_secs: decoded.duration_secs,
@@ -33,16 +43,6 @@ pub fn analyze_file(path: &Path) -> Result<AnalysisResult, String> {
         key_confidence: key_result.confidence,
         energy,
         hot_cues,
+        waveform_peaks,
     })
-}
-
-/// Rough 0..1 "energy" score from RMS loudness, gamma-compressed to feel more
-/// perceptual. Good enough for sorting a setlist by intensity in the MVP.
-fn rms_energy(samples: &[f32]) -> f64 {
-    if samples.is_empty() {
-        return 0.0;
-    }
-    let sum_sq: f64 = samples.iter().map(|s| (*s as f64) * (*s as f64)).sum();
-    let rms = (sum_sq / samples.len() as f64).sqrt();
-    (rms * 4.0).clamp(0.0, 1.0).powf(0.6)
 }

@@ -9,6 +9,13 @@ use symphonia::core::io::MediaSourceStream;
 use symphonia::core::meta::MetadataOptions;
 use symphonia::core::probe::Hint;
 
+// Hard cap on how much audio we ever decode into memory for one file. Plenty
+// for any real song or extended DJ edit; protects against something
+// pathological ending up in the library (a multi-hour recording imported by
+// mistake, a corrupt file symphonia mis-parses) eating gigabytes of RAM and
+// aborting the whole process — not a panic `catch_unwind` can save you from.
+const MAX_DECODE_SECS: f64 = 20.0 * 60.0;
+
 pub struct DecodedAudio {
     pub samples: Vec<f32>, // mono, interleaved-down-to-mono
     pub sample_rate: u32,
@@ -40,6 +47,15 @@ pub fn decode_file(path: &Path) -> Result<DecodedAudio, String> {
         .find(|t| t.codec_params.channels.is_some())
         .ok_or_else(|| "no decodable audio track found".to_string())?
         .clone();
+
+    // The container header often states total duration directly (frame
+    // count + time base), with no need to decode anything — use that for
+    // the *reported* duration so a capped decode below doesn't make a long
+    // file look artificially short in the UI.
+    let container_duration_secs = match (track.codec_params.n_frames, track.codec_params.time_base) {
+        (Some(n_frames), Some(tb)) => Some(n_frames as f64 * tb.numer as f64 / tb.denom as f64),
+        _ => None,
+    };
 
     let track_id = track.id;
     let dec_opts: DecoderOptions = Default::default();
@@ -90,6 +106,10 @@ pub fn decode_file(path: &Path) -> Result<DecodedAudio, String> {
                         mono_samples.push(sum / channels as f32);
                     }
                 }
+
+                if mono_samples.len() as f64 >= MAX_DECODE_SECS * sample_rate as f64 {
+                    break;
+                }
             }
             Err(SymphoniaError::DecodeError(_)) => continue,
             Err(SymphoniaError::IoError(ref e))
@@ -105,11 +125,33 @@ pub fn decode_file(path: &Path) -> Result<DecodedAudio, String> {
         return Err("decoded zero samples from file".to_string());
     }
 
-    let duration_secs = mono_samples.len() as f64 / sample_rate as f64;
+    let decoded_secs = mono_samples.len() as f64 / sample_rate as f64;
+    let duration_secs = container_duration_secs.unwrap_or(decoded_secs);
 
     Ok(DecodedAudio {
         samples: mono_samples,
         sample_rate,
         duration_secs,
     })
+}
+
+/// Linear-interpolation resampler, used to bring a track to the playback
+/// engine's sample rate when two tracks in a mix differ (rare in practice —
+/// nearly everything is 44.1 kHz).
+pub fn resample_linear(samples: &[f32], from_rate: u32, to_rate: u32) -> Vec<f32> {
+    if from_rate == to_rate || samples.is_empty() {
+        return samples.to_vec();
+    }
+    let ratio = from_rate as f64 / to_rate as f64;
+    let new_len = ((samples.len() as f64) / ratio) as usize;
+    (0..new_len)
+        .map(|i| {
+            let src = i as f64 * ratio;
+            let idx = src.floor() as usize;
+            let frac = (src - idx as f64) as f32;
+            let s0 = samples.get(idx).copied().unwrap_or(0.0);
+            let s1 = samples.get(idx + 1).copied().unwrap_or(s0);
+            s0 + (s1 - s0) * frac
+        })
+        .collect()
 }

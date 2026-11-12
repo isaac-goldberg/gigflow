@@ -42,16 +42,16 @@ export function ProfileView() {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between h-14 px-5 border-b border-gig-border bg-gig-panel">
         <div className="flex items-baseline gap-3">
-          <h1 className="text-xs font-bold uppercase tracking-widest text-gig-text">DJ Profile</h1>
+          <h1 className="text-sm font-bold uppercase tracking-widest text-gig-text">DJ Profile</h1>
           <span className="label-xs">Your bio, socials and work — shown when you share with other DJs</span>
         </div>
-        <button onClick={save} className="px-3 py-1.5 rounded-sm text-[11px] font-bold uppercase tracking-wide bg-gig-accent text-black hover:bg-gig-accent/80">
+        <button onClick={save} className="px-3 py-1.5 rounded-sm text-xs font-bold uppercase tracking-wide bg-gig-accent text-black hover:bg-gig-accent/80">
           {saved ? "Saved ✓" : "Save"}
         </button>
       </div>
 
       <div className="flex-1 overflow-y-auto px-5 py-5 max-w-2xl space-y-5">
-        <div className="border border-dashed border-gig-border px-3 py-2 text-[11px] text-gig-muted">
+        <div className="border border-dashed border-gig-border px-3 py-2 text-xs text-gig-muted">
           Profile data is stored locally for now. Publishing a public profile and sharing with other
           Gigflow users needs cloud accounts — coming in a future update.
         </div>
@@ -62,7 +62,7 @@ export function ProfileView() {
             value={profile.display_name}
             onChange={(e) => setProfile({ ...profile, display_name: e.target.value })}
             placeholder="DJ Nova"
-            className="w-full bg-black border border-gig-border rounded-sm px-2.5 py-1.5 text-xs mt-1"
+            className="w-full bg-black border border-gig-border rounded-sm px-2.5 py-1.5 text-sm mt-1"
           />
         </div>
 
@@ -73,7 +73,7 @@ export function ProfileView() {
             onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
             placeholder="Tell other DJs about your sound, residencies, favorite genres…"
             rows={4}
-            className="w-full bg-black border border-gig-border rounded-sm px-2.5 py-1.5 text-xs mt-1 resize-none"
+            className="w-full bg-black border border-gig-border rounded-sm px-2.5 py-1.5 text-sm mt-1 resize-none"
           />
         </div>
 
@@ -82,7 +82,7 @@ export function ProfileView() {
             <label className="label-xs">Social links</label>
             <button
               onClick={() => setProfile({ ...profile, socials: [...profile.socials, { platform: "", url: "" }] })}
-              className="text-[10px] font-bold uppercase text-gig-accent2 hover:underline"
+              className="text-[11px] font-bold uppercase text-gig-accent2 hover:underline"
             >
               + Add link
             </button>
@@ -94,13 +94,13 @@ export function ProfileView() {
                   value={s.platform}
                   onChange={(e) => updateSocial(i, "platform", e.target.value)}
                   placeholder="Instagram"
-                  className="w-32 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-xs"
+                  className="w-32 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-sm"
                 />
                 <input
                   value={s.url}
                   onChange={(e) => updateSocial(i, "url", e.target.value)}
                   placeholder="https://instagram.com/..."
-                  className="flex-1 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-xs"
+                  className="flex-1 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-sm"
                 />
                 <button
                   onClick={() => setProfile({ ...profile, socials: profile.socials.filter((_, j) => j !== i) })}
@@ -118,7 +118,7 @@ export function ProfileView() {
             <label className="label-xs">My work (mixes, releases, links)</label>
             <button
               onClick={() => setProfile({ ...profile, work_links: [...profile.work_links, { title: "", url: "" }] })}
-              className="text-[10px] font-bold uppercase text-gig-accent2 hover:underline"
+              className="text-[11px] font-bold uppercase text-gig-accent2 hover:underline"
             >
               + Add work
             </button>
@@ -130,13 +130,13 @@ export function ProfileView() {
                   value={w.title}
                   onChange={(e) => updateWork(i, "title", e.target.value)}
                   placeholder="Warehouse Set 2026"
-                  className="w-48 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-xs"
+                  className="w-48 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-sm"
                 />
                 <input
                   value={w.url}
                   onChange={(e) => updateWork(i, "url", e.target.value)}
                   placeholder="https://soundcloud.com/..."
-                  className="flex-1 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-xs"
+                  className="flex-1 bg-black border border-gig-border rounded-sm px-2.5 py-1 text-sm"
                 />
                 <button
                   onClick={() => setProfile({ ...profile, work_links: profile.work_links.filter((_, j) => j !== i) })}

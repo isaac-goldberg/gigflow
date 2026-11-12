@@ -7,6 +7,8 @@ pub struct Track {
     pub title: String,
     pub artist: Option<String>,
     pub album: Option<String>,
+    pub genre: Option<String>,
+    pub subgenre: Option<String>,
     pub duration_secs: Option<f64>,
     pub bpm: Option<f64>,
     pub bpm_confidence: Option<f64>,
@@ -15,6 +17,9 @@ pub struct Track {
     pub key_confidence: Option<f64>,
     pub energy: Option<f64>,
     pub artwork_path: Option<String>,
+    /// (min, max) amplitude per downsampled time bucket, for drawing a real
+    /// waveform — `None` until the track has been analyzed.
+    pub waveform_peaks: Option<Vec<(f32, f32)>>,
     pub date_added: String,
     pub date_analyzed: Option<String>,
 }
@@ -29,36 +34,41 @@ pub struct Setlist {
     pub updated_at: String,
 }
 
+/// The transition fields are inline here, not a separate shared/"saved"
+/// entity: a transition's cue points only ever make sense for the specific
+/// pair of tracks on either side of this one gap, so there's nothing to
+/// reuse elsewhere by giving it its own identity.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SetlistEntry {
     pub id: String,
     pub setlist_id: String,
     pub track_id: String,
     pub position: i64,
-    pub transition_id: Option<String>,
+    pub transition_type: Option<String>,
+    pub crossfade_secs: Option<f64>,
+    pub cue_out_secs: Option<f64>,
+    pub cue_in_secs: Option<f64>,
+    pub transition_notes: Option<String>,
+    /// Off = keep the transition's settings but play the outgoing track to
+    /// its end when listening.
+    pub transition_enabled: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SetlistEntryWithTrack {
     pub entry: SetlistEntry,
     pub track: Track,
-    pub transition: Option<Transition>,
 }
 
+/// What `suggest_transition` proposes for a track pair: a phrase-aligned,
+/// structure-aware starting point the user can take as-is or adjust.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct Transition {
-    pub id: String,
-    pub name: String,
+pub struct TransitionSuggestion {
     pub transition_type: String,
     pub crossfade_secs: f64,
     pub cue_out_secs: Option<f64>,
     pub cue_in_secs: Option<f64>,
-    pub notes: Option<String>,
-    pub from_key: Option<String>,
-    pub to_key: Option<String>,
-    pub visibility: String,
-    pub author: Option<String>,
-    pub created_at: String,
+    pub rationale: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -90,6 +100,27 @@ pub struct HotCue {
     pub pad: i64,
     pub position_secs: f64,
     pub label: String,
+}
+
+/// One setlist slot for export: the track, its stored hot cues, and the
+/// transition (if any) assigned to blend into the *next* entry.
+#[derive(Debug, Clone)]
+pub struct ExportEntry {
+    pub track: Track,
+    pub hot_cues: Vec<HotCue>,
+    pub transition_type: Option<String>,
+    pub crossfade_secs: Option<f64>,
+    pub cue_out_secs: Option<f64>,
+    pub cue_in_secs: Option<f64>,
+}
+
+/// What the local AI genre classifier (`llm.rs`) proposes for one track —
+/// always a guess to confirm or dismiss, never auto-applied.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AiGenreSuggestion {
+    pub genre: String,
+    pub subgenre: Option<String>,
+    pub confidence: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

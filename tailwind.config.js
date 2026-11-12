@@ -19,15 +19,14 @@ export default {
           accent2: "#ff2ea6",
           accent3: "#2e7bff",
           warn: "#ff3b3b",
-          text: "#eceef0",
-          muted: "#8c8e93",
-          dim: "#58595d",
+          text: "#f7f8f9",
+          muted: "#c6c8cd",
+          dim: "#9a9ca1",
         },
       },
       fontFamily: {
-        // IBM Plex Sans, self-hosted via @fontsource (see index.css) —
-        // neutral, engineered, pairs with the Plex Mono below. Works offline.
-        sans: ["IBM Plex Sans", "Helvetica Neue", "Arial", "sans-serif"],
+        // Inter, self-hosted via @fontsource (see index.css). Works offline.
+        sans: ["Inter", "Helvetica Neue", "Arial", "sans-serif"],
         mono: ["Menlo", "Consolas", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       borderRadius: {

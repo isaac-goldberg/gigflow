@@ -33,12 +33,29 @@ uuid = { version = "1", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 dirs = "5"
 walkdir = "2"
+ureq = { version = "2", features = ["json"] }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+#
+# panic = "abort" is NOT set here on purpose: with it, any panic anywhere
+# (e.g. hitting an edge case in one malformed/unusual audio file during
+# analysis) instantly kills the whole app with no recovery. Default unwind
+# behavior, combined with catch_unwind around the analysis call in
+# commands.rs, means one bad file fails gracefully instead of crashing.
 [profile.release]
 codegen-units = 1
 lto = true
 opt-level = 3
-panic = "abort"
 strip = true
+
+# Default debug builds (opt-level 0) are 10-50x slower for FFT-heavy numeric
+# code like the audio analysis pipeline — that's the real reason "Analyze
+# all" got so much slower, not the features added. opt-level 1 keeps debug
+# assertions/fast incremental compiles while giving most of the real-world
+# speedup; this is the standard fix for numeric/audio/game code in dev mode.
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3

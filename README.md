@@ -35,6 +35,12 @@ gh run list --repo isaac-goldberg/gigflow
 gh run download <run-id> --repo isaac-goldberg/gigflow
 ```
 
+## If Gigflow crashes
+
+Check `~/Library/Application Support/Gigflow/crash.log` (macOS) — every panic is logged there with
+a timestamp and the exact code location, even in the packaged app where there's no visible
+terminal for stderr. Paste that into a bug report along with which file/action triggered it.
+
 ## Development
 
 ```bash
@@ -43,6 +49,8 @@ npm run tauri dev
 ```
 
 ## Building a release installer
+
+Full step-by-step instructions for macOS and Windows 11 are in [BUILDING.md](BUILDING.md). In short:
 
 ```bash
 npm run tauri build

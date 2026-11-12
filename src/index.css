@@ -1,5 +1,6 @@
-@import "@fontsource/ibm-plex-sans/400.css";
-@import "@fontsource/ibm-plex-sans/700.css";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/700.css";
 
 @tailwind base;
 @tailwind components;
@@ -13,10 +14,10 @@ body,
 
 body {
   @apply bg-gig-bg text-gig-text;
-  /* IBM Plex Sans: neutral, engineered, modern — pairs naturally with the
-     Plex Mono already used for BPM/key/time readouts. Self-hosted via
-     @fontsource so it works fully offline at a venue, no CDN dependency. */
-  font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  /* Inter: the modern UI standard, neutral and highly legible at small
+     sizes. Self-hosted via @fontsource so it works fully offline at a venue,
+     no CDN dependency. */
+  font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
   font-weight: 400;
   margin: 0;
   -webkit-font-smoothing: antialiased;
@@ -77,13 +78,48 @@ select:focus {
 }
 
 .label-xs {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #8c8e93;
+  color: #c6c8cd;
 }
 
 .panel-flat {
   background-color: #131315;
   border: 1px solid #303033;
+}
+
+/* Themed seek bar for the track preview player: a flat pill-shaped track
+   (filled portion drawn via inline background gradient, see SeekBar) with a
+   circular thumb, instead of the browser's default oval slider. Sized up
+   from the browser default so the playhead reads clearly in a compact row. */
+input[type="range"].seek-range {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 7px;
+  border-radius: 9999px;
+  outline: none;
+}
+
+input[type="range"].seek-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff2ea6;
+  border: 3px solid #0a0a0b;
+}
+
+input[type="range"].seek-range::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff2ea6;
+  border: 3px solid #0a0a0b;
+}
+
+input[type="range"].seek-range::-moz-range-track {
+  height: 7px;
+  border-radius: 9999px;
+  background: transparent;
 }
